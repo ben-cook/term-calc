@@ -5,6 +5,7 @@
   "scripts": {
     "start": "npx tsc && node build/main.js",
     "dev": "npx tsc -w",
+    "build": "npx tsc",
     "test": "jest"
   },
   "author": "Ben Cook",

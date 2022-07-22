@@ -9,6 +9,7 @@ export const calculateTermDeposit = (
 ) => {
   if (frequency === Frequency.AtMaturity) {
     // This case is can be calculated using simple interest
+    // Use decimal.js for greater precision
     return new Decimal(principle)
       .times(
         new Decimal(1).plus(
