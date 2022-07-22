@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { Frequency } from "./main";
 
 export const calculateTermDeposit = (
@@ -8,7 +9,15 @@ export const calculateTermDeposit = (
 ) => {
   if (frequency === Frequency.AtMaturity) {
     // This case is can be calculated using simple interest
-    return principle * (1 + (interestRate / 100) * investmentTerm);
+    return new Decimal(principle)
+      .times(
+        new Decimal(1).plus(
+          new Decimal(interestRate)
+            .div(new Decimal(100))
+            .times(new Decimal(investmentTerm))
+        )
+      )
+      .toNumber();
   }
 
   let frequencyPerYear: number;
@@ -26,11 +35,17 @@ export const calculateTermDeposit = (
       throw new Error("Unreachable code.");
   }
 
-  return (
-    principle *
-    Math.pow(
-      1 + interestRate / (100 * frequencyPerYear),
-      frequencyPerYear * investmentTerm
+  return new Decimal(principle)
+    .times(
+      new Decimal(1)
+        .plus(
+          new Decimal(interestRate).div(
+            new Decimal(100).times(new Decimal(frequencyPerYear))
+          )
+        )
+        .toPower(
+          new Decimal(frequencyPerYear).times(new Decimal(investmentTerm))
+        )
     )
-  );
+    .toNumber();
 };

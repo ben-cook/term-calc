@@ -2,8 +2,6 @@ import { Command, InvalidArgumentError } from "commander";
 
 import { calculateTermDeposit } from "./calculator";
 
-const program = new Command();
-
 export enum Frequency {
   Monthly = "monthly",
   Quarterly = "quarterly",
@@ -18,46 +16,54 @@ const parseFrequency = (value: any): Frequency => {
   return value as unknown as Frequency;
 };
 
-function customParseInt(value: any): number {
-  const parsedValue = parseInt(value, 10);
+const customParseFloat = (value: any): number => {
+  const parsedValue = parseFloat(value);
   if (isNaN(parsedValue)) {
     throw new InvalidArgumentError("Not a number.");
   }
   return parsedValue;
-}
+};
 
-program
-  .name("term-calc")
-  .description("CLI to calculate the value of term deposits")
-  .version("1.0.0")
-  .argument("<principle>", "start deposit amount", customParseInt)
-  .argument("<interest>", "interest rate (annual)", customParseInt)
-  .argument("<investment term>", "length of investment", customParseInt)
-  .argument(
-    "<frequency>",
-    "how frequently interest is paid. \
+const main = () => {
+  const program = new Command();
+
+  program
+    .name("term-calc")
+    .description("CLI to calculate the value of term deposits")
+    .version("1.0.0")
+    .argument("<principle>", "start deposit amount", customParseFloat)
+    .argument("<interest>", "interest rate (annual)", customParseFloat)
+    .argument("<investment term>", "length of investment", customParseFloat)
+    .argument(
+      "<frequency>",
+      "how frequently interest is paid. \
   choices = monthly, quarterly, annually, maturity.",
-    parseFrequency
-  )
-  .helpOption("-h, --help", "display this help message")
-  .action((...args) => {
-    const value = calculateTermDeposit(
-      ...(args as [number, number, number, Frequency])
-    );
+      parseFrequency
+    )
+    .helpOption("-h, --help", "display this help message")
+    .action((...args) => {
+      const value = calculateTermDeposit(
+        ...(args as [number, number, number, Frequency])
+      );
 
-    const formatter = new Intl.NumberFormat("en-AU", {
-      style: "currency",
-      currency: "AUD",
-      // Use whole numbers because that's what the examples given do
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      const formatter = new Intl.NumberFormat("en-AU", {
+        style: "currency",
+        currency: "AUD",
+        // Use whole numbers because that's what the examples given do
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      });
+
+      console.log(formatter.format(value));
     });
 
-    console.log(formatter.format(value));
-  });
+  if (process.argv.length < 4) {
+    program.help({ error: true });
+  }
 
-if (process.argv.length < 4) {
-  program.help({ error: true });
+  program.parse();
+};
+
+if ((process.env.NODE_ENV as unknown as string) !== "test") {
+  main();
 }
-
-program.parse();
